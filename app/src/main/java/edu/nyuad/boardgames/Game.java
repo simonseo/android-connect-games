@@ -1,7 +1,5 @@
 package edu.nyuad.boardgames;
 
-import exc.GameStateException;
-
 import java.util.Observable;
 
 /**
