@@ -1,6 +1,5 @@
 package edu.nyuad.androidgames;
 
-import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -10,12 +9,12 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import edu.nyuad.boardgames.Chip;
 import edu.nyuad.boardgames.Game;
-import edu.nyuad.boardgames.GameIndexOutOfBoundsException;
 import edu.nyuad.boardgames.GameStateException;
 
 import static java.lang.Math.max;
@@ -28,6 +27,14 @@ public class BoardGameActivity extends AppCompatActivity {
     private Button exitButton;
     private ImageView currentPlayerView, winnerView;
     private AndroidToGameTranslator translator;
+    public enum marker {
+        EMPTY (R.drawable.rounded_button_grey),
+        RED (R.drawable.rounded_button_red),
+        BLUE (R.drawable.rounded_button_blue);
+        private int value;
+        marker(int value) { this.value = value; }
+        int getValue() { return this.value; }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +88,6 @@ public class BoardGameActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Toast.makeText(getApplicationContext(), "" + i + " " + l, Toast.LENGTH_SHORT).show();
                 Chip currentPlayer = null;
-                boolean success = true;
                 try {
                     int[] positions = translator.androidToBoard(i);
                     int row = positions[0], col = positions[1];
@@ -89,11 +95,8 @@ public class BoardGameActivity extends AppCompatActivity {
                     game.placeChip(row, col);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    success = false;
                 }
-                if (success) {
-                    adapter.place(currentPlayer, i);
-                }
+                adapter.setAll(flattenBoard());
                 if (game.isGameOver()) {
                     // Change current player colour to empty
                     Chip winner = Chip.EMPTY;
@@ -113,5 +116,15 @@ public class BoardGameActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private ArrayList<Chip> flattenBoard() {
+        ArrayList<Chip> data = new ArrayList<Chip>();
+        for (int i = 0; i < game.getRows(); i++) {
+            for (int j = 0; j < game.getColumns(); j++) {
+                data.add(game.getChip(i, j));
+            }
+        }
+        return data;
     }
 }

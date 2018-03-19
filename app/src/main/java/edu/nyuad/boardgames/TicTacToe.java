@@ -25,7 +25,7 @@ public class TicTacToe extends ConnectGame {
 			throw new GameIndexOutOfBoundsException(row, col);
 		}
 		if (!this.getChip(row, col).isEmpty() ) {
-			System.out.println("Error: tried to place chip on a place that is already taken");
+			System.out.println("Error: tried to set chip on a set that is already taken");
 			throw new UnsupportedOperationException();
 		}
 

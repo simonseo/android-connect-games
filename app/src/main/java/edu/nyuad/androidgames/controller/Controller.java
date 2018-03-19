@@ -25,7 +25,7 @@ public class Controller {
 	}
 	
 	public void round() {
-		// receive user input of their desire column and place chip in board
+		// receive user input of their desire column and set chip in board
 		boolean pass = false;
 		while (!pass) {
 			try {
@@ -45,7 +45,7 @@ public class Controller {
 				this.scan.skip("[^0-9]");
 				e.printStackTrace();
 			} catch (GameIndexOutOfBoundsException e) {
-				System.out.println("Error: That place doesn't exist. Try another one");
+				System.out.println("Error: That set doesn't exist. Try another one");
 			} catch (GameStateException e) {
 				System.out.println("Error: Check that the game is running");
 				e.printStackTrace();

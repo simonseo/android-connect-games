@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 
 import edu.nyuad.boardgames.Chip;
+import static edu.nyuad.androidgames.BoardGameActivity.marker;
 
 /**
  * Created by seo on 3/19/18.
@@ -23,14 +24,7 @@ public class GridAdapter extends ArrayAdapter {
     private ArrayList<marker> mData;
     private String TAG;
     private int rowSize, colSize;
-    private enum marker {
-        EMPTY (R.drawable.rounded_button_grey),
-        RED (R.drawable.rounded_button_red),
-        BLUE (R.drawable.rounded_button_blue);
-        private int value;
-        marker(int value) { this.value = value; }
-        int getValue() { return this.value; }
-    }
+
 
     public GridAdapter(@NonNull Context context, int resource) {
         super(context, resource);
@@ -50,16 +44,20 @@ public class GridAdapter extends ArrayAdapter {
         this.colSize = colSize;
     }
 
-    public void set(Object object, int index) {
-        assert (object instanceof marker);
-        Object o = this.getItem(index);
-        this.remove(o);
-        this.insert(object, index);
+
+    public void set(Chip chip, int index) {
+        assert (marker.valueOf(chip.toString()) instanceof marker);
+        mData.set(index, marker.valueOf(chip.toString()));
+        clear();
+        addAll(mData);
+        notifyDataSetChanged();
     }
 
-    public void place(Chip currentPlayer, int index) {
-        assert (marker.valueOf(currentPlayer.toString()) instanceof marker);
-        mData.set(index, marker.valueOf(currentPlayer.toString()));
+    public void setAll(ArrayList<Chip> data) {
+        mData.clear();
+        for (Chip chip : data) {
+            mData.add(marker.valueOf(chip.toString()));
+        }
         clear();
         addAll(mData);
         notifyDataSetChanged();
