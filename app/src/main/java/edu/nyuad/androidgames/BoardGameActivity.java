@@ -3,11 +3,15 @@ package edu.nyuad.androidgames;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import edu.nyuad.boardgames.Game;
 
-public class boardGameActivity extends AppCompatActivity {
+public class BoardGameActivity extends AppCompatActivity {
     private String TAG;
     private Game game;
     private GridView gridView;
@@ -19,12 +23,14 @@ public class boardGameActivity extends AppCompatActivity {
         TAG = getApplicationContext().getPackageName() +  "." + getLocalClassName();
 
         Bundle extras = getIntent().getExtras();
+        //should never go to default, but just to be safe
         String gameName = extras.getString("gameName", "ConnectFour");
         String className = "edu.nyuad.boardgames" + "." + gameName;
         Log.i(TAG, "className is: " + className);
         try {
             Class classRef = Class.forName(className);
             game = (Game)classRef.newInstance();
+            Log.i("BoardGameActivity.java", "my message");
             Log.i(TAG,"Game of type " + gameName + " instantiated");
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -36,9 +42,13 @@ public class boardGameActivity extends AppCompatActivity {
 
         gridView = (GridView)findViewById(R.id.boardGridView);
         gridView.setNumColumns(game.getColumns());
-        gridAdapter = new gridAdapter(this, game.getColumns() * game.getRows());
-        gridView.setAdapter(gridAdapter);
-
+        gridView.setAdapter(new GridAdapter(this, game.getRows() * game.getColumns()));
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(getApplicationContext(), ""+i+" "+l, Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 

@@ -40,9 +40,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
             String selected = sItems.getSelectedItem().toString();
             Log.i(TAG, "selected option: " + selected);
-            Intent i = new Intent(MainActivity.this, boardGameActivity.class);
-            i.putExtra("gameName", selected );
-            startActivity(i);
+            Intent intent = new Intent(MainActivity.this, BoardGameActivity.class);
+            intent.putExtra("gameName", selected );
+            startActivity(intent);
             }
         });
     }
