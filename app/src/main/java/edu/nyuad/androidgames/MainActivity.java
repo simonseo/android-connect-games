@@ -13,8 +13,6 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.nyuad.boardgames.ConnectGame;
-
 public class MainActivity extends AppCompatActivity {
     private String TAG;
 
@@ -42,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
             String selected = sItems.getSelectedItem().toString();
             Log.i(TAG, "selected option: " + selected);
-            Intent i = new Intent(MainActivity.this, boardgame.class);
+            Intent i = new Intent(MainActivity.this, boardGameActivity.class);
             i.putExtra("gameName", selected );
             startActivity(i);
             }

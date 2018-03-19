@@ -7,7 +7,7 @@ import android.widget.GridView;
 
 import edu.nyuad.boardgames.Game;
 
-public class boardgame extends AppCompatActivity {
+public class boardGameActivity extends AppCompatActivity {
     private String TAG;
     private Game game;
     private GridView gridView;
