@@ -1,26 +1,39 @@
 package edu.nyuad.androidgames;
 
+import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import edu.nyuad.boardgames.Chip;
 import edu.nyuad.boardgames.Game;
+import edu.nyuad.boardgames.GameIndexOutOfBoundsException;
+import edu.nyuad.boardgames.GameStateException;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class BoardGameActivity extends AppCompatActivity {
     private String TAG;
     private Game game;
     private GridView gridView;
+    private Button exitButton;
+    private ImageView currentPlayerView, winnerView;
+    private AndroidToGameTranslator translator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_boardgame);
-        TAG = getApplicationContext().getPackageName() +  "." + getLocalClassName();
+        TAG = getApplicationContext().getPackageName() + "." + getLocalClassName();
 
         Bundle extras = getIntent().getExtras();
         //should never go to default, but just to be safe
@@ -29,9 +42,10 @@ public class BoardGameActivity extends AppCompatActivity {
         Log.i(TAG, "className is: " + className);
         try {
             Class classRef = Class.forName(className);
-            game = (Game)classRef.newInstance();
+            game = (Game) classRef.newInstance();
+            translator = new AndroidToGameTranslator(game.getRows(), game.getColumns());
             Log.i("BoardGameActivity.java", "my message");
-            Log.i(TAG,"Game of type " + gameName + " instantiated");
+            Log.i(TAG, "Game of type " + gameName + " instantiated");
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -40,36 +54,64 @@ public class BoardGameActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        gridView = (GridView)findViewById(R.id.boardGridView);
-        gridView.setNumColumns(game.getColumns());
-        gridView.setAdapter(new GridAdapter(this, game.getRows() * game.getColumns()));
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        currentPlayerView = (ImageView) findViewById(R.id.currentPlayerImageView);
+        winnerView = (ImageView) findViewById(R.id.winnerPlayerImageView);
+        exitButton = (Button) findViewById(R.id.exitButton);
+        exitButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getApplicationContext(), ""+i+" "+l, Toast.LENGTH_SHORT).show();
+            public void onClick(View view) {
+                finish();
             }
         });
 
+        gridView = (GridView) findViewById(R.id.boardGridView);
+        gridView.setNumColumns(game.getColumns());
+
+
+        final GridAdapter adapter = new GridAdapter(this, game.getRows() * game.getColumns());
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int w = (displayMetrics.widthPixels * 9) / (10 * game.getColumns());   //width for imageview should take up 90% of screen
+        int h = (displayMetrics.heightPixels * 3) / (4 * game.getRows());   //height for imageview should take up 75% of screen
+        int viewSize = min(h, w);
+        adapter.setViewDimensions(viewSize, viewSize);
+        gridView.setAdapter(adapter);
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(getApplicationContext(), "" + i + " " + l, Toast.LENGTH_SHORT).show();
+                Chip currentPlayer = null;
+                boolean success = true;
+                try {
+                    int[] positions = translator.androidToBoard(i);
+                    int row = positions[0], col = positions[1];
+                    currentPlayer = game.getCurrentPlayer();
+                    game.placeChip(row, col);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    success = false;
+                }
+                if (success) {
+                    adapter.place(currentPlayer, i);
+                }
+                if (game.isGameOver()) {
+                    // Change current player colour to empty
+                    Chip winner = Chip.EMPTY;
+                    try {
+                        winner = game.getWinningPlayer();
+                    } catch (GameStateException e) {
+                        // pass
+                    }
+                    if (winner.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), getString(R.string.tieMessage), Toast.LENGTH_LONG).show();
+                    } else {
+                        // Change winning player colour to winner
+                        Toast.makeText(getApplicationContext(), String.format(getString(R.string.winMessage), winner), Toast.LENGTH_LONG).show();
+                    }
+                }
+
+
+            }
+        });
     }
-
-    /*
-    // Parent layout
-    LinearLayout parentLayout = (LinearLayout)findViewById(R.id.layout);
-
-    // Layout inflater
-    LayoutInflater layoutInflater = getLayoutInflater();
-    View view;
-
-    for (int i = 1; i < 101; i++){
-        // Add the text layout to the parent layout
-        view = layoutInflater.inflate(R.layout.text_layout, parentLayout, false);
-
-        // In order to get the view we have to use the new view with text_layout in it
-        TextView textView = (TextView)view.findViewById(R.id.text);
-        textView.setText("Row " + i);
-
-        // Add the text view to the parent layout
-        parentLayout.addView(textView);
-    */
-
 }

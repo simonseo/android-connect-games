@@ -6,4 +6,6 @@
     <string name="emptyChip">empty</string>
     <string name="redChip">red</string>
     <string name="blueChip">blue</string>
+    <string name="tieMessage">It's a Tie!</string>
+    <string name="winMessage">%s Won! Congratulations!</string>
 </resources>

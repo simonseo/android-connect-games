@@ -10,6 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
+
 import edu.nyuad.boardgames.Chip;
 
 /**
@@ -18,7 +20,9 @@ import edu.nyuad.boardgames.Chip;
 
 public class GridAdapter extends ArrayAdapter {
     private Context mContext;
+    private ArrayList<marker> mData;
     private String TAG;
+    private int rowSize, colSize;
     private enum marker {
         EMPTY (R.drawable.rounded_button_grey),
         RED (R.drawable.rounded_button_red),
@@ -30,26 +34,49 @@ public class GridAdapter extends ArrayAdapter {
 
     public GridAdapter(@NonNull Context context, int resource) {
         super(context, resource);
-        mContext = context;
         TAG = this.getClass().getName();
+        mContext = context;
+        mData = new ArrayList<marker>();
 
         for (int i = 0; i < resource; i++) {
-            this.add(marker.EMPTY); // Populate with empty chips
+            mData.add(marker.EMPTY); // Populate with empty chips
         }
+        addAll(mData);
+        notifyDataSetChanged();
+    }
+
+    public void setViewDimensions(int rowSize, int colSize) {
+        this.rowSize = rowSize;
+        this.colSize = colSize;
+    }
+
+    public void set(Object object, int index) {
+        assert (object instanceof marker);
+        Object o = this.getItem(index);
+        this.remove(o);
+        this.insert(object, index);
+    }
+
+    public void place(Chip currentPlayer, int index) {
+        assert (marker.valueOf(currentPlayer.toString()) instanceof marker);
+        mData.set(index, marker.valueOf(currentPlayer.toString()));
+        clear();
+        addAll(mData);
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        ImageView view;
+        View view;
         if (convertView == null) {
             view = new ImageView(mContext);
-            view.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            view.setLayoutParams(new GridView.LayoutParams(100, 100));
+            ((ImageView)view).setScaleType(ImageView.ScaleType.FIT_CENTER);
+            view.setLayoutParams(new GridView.LayoutParams(colSize, rowSize)); // set width and height of view
         } else {
             view = (ImageView)convertView;
         }
-        view.setImageResource(((marker)getItem(position)).getValue());  // the marker at given position
+        ((ImageView)view).setImageResource(((marker)getItem(position)).getValue());  // the marker at given position
         return view;
     }
 }
