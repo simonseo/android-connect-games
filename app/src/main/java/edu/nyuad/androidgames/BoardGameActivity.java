@@ -26,6 +26,8 @@ public class BoardGameActivity extends AppCompatActivity {
     private GridView gridView;
     private Button exitButton;
     private ImageView currentPlayerView, winnerView;
+    private GridAdapter adapter;
+    private Boolean notRequireRow;
     private AndroidToGameTranslator translator;
     public enum marker {
         EMPTY (R.drawable.rounded_button_grey),
@@ -42,9 +44,10 @@ public class BoardGameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_boardgame);
         TAG = getApplicationContext().getPackageName() + "." + getLocalClassName();
 
+        // Create a Game instance based on what was passed via extras
         Bundle extras = getIntent().getExtras();
-        //should never go to default, but just to be safe
         String gameName = extras.getString("gameName", "ConnectFour");
+        notRequireRow = gameName.equals("ConnectFour") || gameName.equals("Complica");
         String className = "edu.nyuad.boardgames" + "." + gameName;
         Log.i(TAG, "className is: " + className);
         try {
@@ -53,15 +56,13 @@ public class BoardGameActivity extends AppCompatActivity {
             translator = new AndroidToGameTranslator(game.getRows(), game.getColumns());
             Log.i("BoardGameActivity.java", "my message");
             Log.i(TAG, "Game of type " + gameName + " instantiated");
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
+        // Top toolbar
         currentPlayerView = (ImageView) findViewById(R.id.currentPlayerImageView);
+        currentPlayerView.setImageResource(marker.valueOf(game.getCurrentPlayer().toString()).getValue());
         winnerView = (ImageView) findViewById(R.id.winnerPlayerImageView);
         exitButton = (Button) findViewById(R.id.exitButton);
         exitButton.setOnClickListener(new View.OnClickListener() {
@@ -71,11 +72,13 @@ public class BoardGameActivity extends AppCompatActivity {
             }
         });
 
+
+        // GridView
         gridView = (GridView) findViewById(R.id.boardGridView);
         gridView.setNumColumns(game.getColumns());
 
 
-        final GridAdapter adapter = new GridAdapter(this, game.getRows() * game.getColumns());
+        adapter = new GridAdapter(this, game.getRows() * game.getColumns());
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         int w = (displayMetrics.widthPixels * 9) / (10 * game.getColumns());   //width for imageview should take up 90% of screen
         int h = (displayMetrics.heightPixels * 3) / (4 * game.getRows());   //height for imageview should take up 75% of screen
@@ -86,36 +89,38 @@ public class BoardGameActivity extends AppCompatActivity {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getApplicationContext(), "" + i + " " + l, Toast.LENGTH_SHORT).show();
-                Chip currentPlayer = null;
-                try {
-                    int[] positions = translator.androidToBoard(i);
-                    int row = positions[0], col = positions[1];
-                    currentPlayer = game.getCurrentPlayer();
-                    game.placeChip(row, col);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                adapter.setAll(flattenBoard());
-                if (game.isGameOver()) {
-                    // Change current player colour to empty
-                    Chip winner = Chip.EMPTY;
-                    try {
-                        winner = game.getWinningPlayer();
-                    } catch (GameStateException e) {
-                        // pass
-                    }
-                    if (winner.isEmpty()) {
-                        Toast.makeText(getApplicationContext(), getString(R.string.tieMessage), Toast.LENGTH_LONG).show();
-                    } else {
-                        // Change winning player colour to winner
-                        Toast.makeText(getApplicationContext(), String.format(getString(R.string.winMessage), winner), Toast.LENGTH_LONG).show();
-                    }
-                }
-
-
+                play(i);
             }
         });
+    }
+
+    private void play(int position) {
+        Chip currentPlayer = null;
+        boolean success = true;
+        try {
+            int[] positions = translator.androidToBoard(position);
+            int row = notRequireRow ? 0 : positions[0];
+            int col = positions[1];
+            game.placeChip(row, col);
+            currentPlayer = game.getCurrentPlayer();
+        } catch (Exception e) { success = false; }
+
+        if (success) {
+            adapter.setAll(flattenBoard());
+            currentPlayerView.setImageResource(marker.valueOf(currentPlayer.toString()).getValue());
+        }
+        if (game.isGameOver()) {
+            Chip winner;
+            try { winner = game.getWinningPlayer(); }
+            catch (GameStateException e) { winner = Chip.EMPTY; }
+            winnerView.setImageResource(marker.valueOf(winner.toString()).getValue());
+
+            if (winner.isEmpty()) {
+                Toast.makeText(getApplicationContext(), getString(R.string.tieMessage), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getApplicationContext(), String.format(getString(R.string.winMessage), winner), Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private ArrayList<Chip> flattenBoard() {
