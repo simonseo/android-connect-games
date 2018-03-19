@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Android Games</string>
+    <string name="exitFromBoardGame">Quit</string>
+    <string name="currentPlayer">Current Player</string>
+    <string name="winnerPlayer">Winner</string>
+    <string name="emptyChip">empty</string>
+    <string name="redChip">red</string>
+    <string name="blueChip">blue</string>
 </resources>
