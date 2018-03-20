@@ -44,15 +44,6 @@ public class GridAdapter extends ArrayAdapter {
         this.colSize = colSize;
     }
 
-
-    public void set(Chip chip, int index) {
-        assert (marker.valueOf(chip.toString()) instanceof marker);
-        mData.set(index, marker.valueOf(chip.toString()));
-        clear();
-        addAll(mData);
-        notifyDataSetChanged();
-    }
-
     public void setAll(ArrayList<Chip> data) {
         mData.clear();
         for (Chip chip : data) {

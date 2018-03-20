@@ -15,6 +15,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private String TAG;
+    private List<String> spinnerArray;
+    private ArrayAdapter<String> adapter;
+    private Button startButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,19 +25,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         TAG = getApplicationContext().getPackageName() +  "." + getLocalClassName();
 
-        List<String> spinnerArray =  new ArrayList<String>();
+        spinnerArray =  new ArrayList<String>();
         spinnerArray.add("TicTacToe");
         spinnerArray.add("ConnectFour");
         spinnerArray.add("Complica");
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, spinnerArray);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinnerArray);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         final Spinner sItems = (Spinner) findViewById(R.id.gameSelectSpinner);
         sItems.setAdapter(adapter);
 
-        Button startButton = (Button)findViewById(R.id.startButton);
+        startButton = (Button)findViewById(R.id.startButton);
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
