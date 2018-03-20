@@ -54,7 +54,6 @@ public class BoardGameActivity extends AppCompatActivity {
             Class classRef = Class.forName(className);
             game = (Game) classRef.newInstance();
             translator = new AndroidToGameTranslator(game.getRows(), game.getColumns());
-            Log.i("BoardGameActivity.java", "my message");
             Log.i(TAG, "Game of type " + gameName + " instantiated");
         } catch (Exception e) {
             e.printStackTrace();

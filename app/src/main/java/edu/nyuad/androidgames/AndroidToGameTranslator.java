@@ -19,7 +19,4 @@ public class AndroidToGameTranslator {
     public int[] androidToBoard(int androidPosition) {
         return new int[] {androidPosition/numCol, androidPosition%numCol};
     }
-    public int boardToAndroid(int row, int col) {
-        return row * numRow + col;
-    }
 }
