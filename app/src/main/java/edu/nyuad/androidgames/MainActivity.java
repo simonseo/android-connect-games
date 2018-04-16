@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             String selected = sItems.getSelectedItem().toString();
             Log.i(TAG, "selected option: " + selected);
             Intent intent = new Intent(MainActivity.this, BoardGameActivity.class);
-            intent.putExtra("gameName", selected );
+            intent.putExtra("gameName", selected);
             startActivity(intent);
             }
         });
